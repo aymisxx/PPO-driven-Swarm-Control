@@ -127,7 +127,7 @@ PPO-driven Swarm Control
 └── README.md
 ```
 
-The notebook (PPO_Driven_Swarm_Control (Notebook).ipynb) is **fully standalone and reproducible**, starting from NDVI extraction and ending with full swarm simulations.
+The notebook (**PPO_Driven_Swarm_Control (Notebook).ipynb**) is **fully standalone and reproducible**, starting from NDVI extraction and ending with full swarm simulations.
 
 ---
 
