@@ -1,0 +1,12 @@
+numpy
+pandas
+matplotlib
+opencv-python
+gymnasium
+stable-baselines3
+torch               # Prefer cuda-enabled TORCH if GPU-privilege exists
+tqdm
+jupyter
+imageio
+imageio-ffmpeg
+tensorboard
