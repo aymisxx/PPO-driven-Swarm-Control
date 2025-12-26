@@ -1,4 +1,4 @@
-# PPO-Driven Swarm Control  
+# PPO-driven Swarm Control  
 
 ### A Hybrid Multi-Robot Framework Combining Reinforcement Learning, Consensus, Potential Fields, and CRN-Based Role Switching
 
