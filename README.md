@@ -122,7 +122,7 @@ PPO-driven Swarm Control
 ├── results/
 │  (trajectory plots)
 ├── report/
-│   ├── PPO_driven_Swarm_Control_Report.pdf
+│   └── PPO_driven_Swarm_Control_Report.pdf
 ├── PPO_Driven_Swarm_Control (Notebook).ipynb
 ├── PPO_Driven_Swarm_Control (PDF).pdf
 ├── requirements.txt
@@ -178,8 +178,6 @@ By embedding PPO inside a **theoretically grounded MRS framework**, we obtain:
 ## Results & Analysis
 
 The proposed hybrid swarm-control framework was evaluated through extensive simulations on a vegetation-driven coverage task. Performance was analyzed by progressively enabling coordination layers on top of a PPO-based local controller.
-
-Minor boundary accumulation observed in earlier runs was found to be a transient effect of initialization and stochastic policy execution; upon rerunning the simulation with updated parameters, the swarm exhibited uniform coverage without persistent boundary clustering.
 
 ### Experimental Regimes
 
@@ -237,6 +235,8 @@ Trajectory visualizations and time-lapse videos reveal clear qualitative differe
 - **PPO-only swarms** appear chaotic and locally greedy.
 - **Hybrid swarms** exhibit smooth, structured, and interpretable collective motion.
 - The **full hybrid controller** produces emergent behaviors such as territory splitting, wave-like dispersion, and coverage-front propagation.
+
+> Minor boundary accumulation observed in earlier runs was found to be a transient effect of initialization and stochastic policy execution; upon rerunning the simulation with updated parameters, the swarm exhibited uniform coverage without persistent boundary clustering.
 
 ### Limitations
 
