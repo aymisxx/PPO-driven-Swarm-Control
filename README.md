@@ -120,14 +120,16 @@ PPO-driven Swarm Control
 ├── models/
 │   └── ppo_ndvi_drone.zip
 ├── results/
-│   (trajectory plots)
+│  (trajectory plots)
+├── report/
+│   ├── PPO_driven_Swarm_Control_Report.pdf
 ├── PPO_Driven_Swarm_Control (Notebook).ipynb
 ├── PPO_Driven_Swarm_Control (PDF).pdf
 ├── requirements.txt
 └── README.md
 ```
 
-The notebook (**PPO_Driven_Swarm_Control (Notebook).ipynb**) is **fully standalone and reproducible**, starting from NDVI extraction and ending with full swarm simulations.
+The notebook (**PPO_Driven_Swarm_Control (Notebook).ipynb**) is **fully standalone and reproducible**, starting from NDVI extraction and ending with full swarm simulations. **results** contains the hybrid rollout trajectory video. **report** folder contains the project report.
 
 ---
 
@@ -176,6 +178,8 @@ By embedding PPO inside a **theoretically grounded MRS framework**, we obtain:
 ## Results & Analysis
 
 The proposed hybrid swarm-control framework was evaluated through extensive simulations on a vegetation-driven coverage task. Performance was analyzed by progressively enabling coordination layers on top of a PPO-based local controller.
+
+Minor boundary accumulation observed in earlier runs was found to be a transient effect of initialization and stochastic policy execution; upon rerunning the simulation with updated parameters, the swarm exhibited uniform coverage without persistent boundary clustering.
 
 ### Experimental Regimes
 
