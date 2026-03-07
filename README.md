@@ -37,6 +37,13 @@ This setup naturally emphasizes:
 
 ---
 
+### **Simulation Environment**
+
+The custom made simulation environment used:
+> https://github.com/aymisxx/MicroUAV-2D
+
+---
+
 ## Core Contributions
 
 ### 1. PPO-Based Local Navigation
@@ -261,5 +268,7 @@ Additionally, the learned PPO policy is not explicitly safety-aware and relies o
 If you use or build upon this work / fork this work, please cite:
 
 > Ayushman Mishra, *PPO-Driven Swarm Control: A Hybrid Multi-Robot Framework Combining Consensus, Potential Fields, and CRN-Based Role Switching*, github.com/aymisxx/PPO-driven-Swarm-Control
+
+> Ayushman Mishra, *MicroUAV-2D: Lightweight 2D Down-Camera UAV Simulation Environment for Rapid Autonomy Prototyping*, github.com/aymisxx/MicroUAV-2D
 
 ---
