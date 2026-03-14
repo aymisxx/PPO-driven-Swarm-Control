@@ -206,8 +206,7 @@ All experiments used identical NDVI fields, swarm sizes, episode lengths, and in
 
 Hybrid swarm controller combining PPO policy with artificial potential fields, consensus dynamics, and stochastic role switching.
 
-▶ **Watch the simulation:**  
-https://github.com/aymisxx/PPO-driven-Swarm-Control/blob/main/results/final_hybrid_rollout.mp4
+![Swarm Demo](results/final_hybrid_rollout.gif)
 
 ### Coverage Performance
 
