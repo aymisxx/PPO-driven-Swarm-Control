@@ -202,6 +202,12 @@ Five control configurations were compared:
 
 All experiments used identical NDVI fields, swarm sizes, episode lengths, and initialization distributions to ensure fair comparison.
 
+### Final Hybrid Swarm Rollout
+
+<video src="./results/final_hybrid_rollout.mp4" controls width="750"></video>
+
+Hybrid swarm controller combining PPO policy with artificial potential fields, consensus dynamics, and stochastic role switching.
+
 ### Coverage Performance
 
 - **Single-agent PPO** successfully learns vegetation-seeking behavior but is inherently limited in spatial coverage.
