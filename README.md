@@ -305,36 +305,19 @@ This layer is what gives the swarm its “don’t pile up like confused pigeons�
 
 ### 8) Graph-Based Consensus Dynamics
 
-A local communication graph is built at each timestep. Two agents are connected if they lie within a communication radius $R$. This defines a time-varying interaction graph:
+A local communication graph is built at each timestep. Two agents are connected if they lie within a communication radius $R$, giving a time-varying interaction graph
 
-$$
-\mathcal{G}(k) = (\mathcal{V}, \mathcal{E}(k))
-$$
+$$ G(k) = (\mathcal{V}, \mathcal{E}(k)) $$
 
-with neighbor set $\mathcal{N}_i(k)$ for each agent.
+with neighbor set $N_i(k)$ for agent $i$.
 
-Each drone maintains a local scalar coordination variable $y_i(k)$, such as a local coverage score or imbalance metric. The notebook gives the consensus update in the standard Laplacian form:
+Each drone maintains a local scalar coordination variable $y_i(k)$, such as a local coverage score or imbalance metric. A simple consensus update is then applied:
 
-$$
-y_i(k+1)
-=
-y_i(k)
--
-\epsilon
-\sum_{j \in \mathcal{N}_i(k)}
-\big(y_i(k) - y_j(k)\big)
-$$
+$$ y_i(k+1) = y_i(k) - \epsilon \sum_{j \in N_i(k)} \big(y_i(k) - y_j(k)\big) $$
 
 where $\epsilon > 0$ is the consensus step size.
 
-This update reduces disagreement between neighboring agents. In motion terms, it helps the swarm:
-
-- reduce imbalance,
-- avoid fragmented behavior,
-- spread more coherently,
-- suppress local over-concentration.
-
-So consensus is not just a bookkeeping layer. It acts as the swarm’s decentralized “social correction term.”
+This update reduces disagreement between neighboring agents and helps the swarm balance coverage, avoid fragmentation, and spread more coherently.
 
 ### 9) CRN-Inspired Role Switching
 
