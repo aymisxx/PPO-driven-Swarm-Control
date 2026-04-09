@@ -267,15 +267,7 @@ The agent’s current role $r_i(k)$ modifies the relative weight of PPO, potenti
 #### Step 5: Final hybrid action
 The resulting action is a weighted blend:
 
-$$
-a_i^{\mathrm{hybrid}}(k)
-=
-w_i^{\mathrm{ppo}}(k)\,a_i^{\mathrm{PPO}}(k)
-+
-w_i^{\mathrm{pf}}(k)\,a_i^{\mathrm{PF}}(k)
-+
-w_i^{\mathrm{cons}}(k)\,a_i^{\mathrm{cons}}(k)
-$$
+$$ a_i^{\mathrm{hybrid}}(k) = w_i^{\mathrm{ppo}}(k)\,a_i^{\mathrm{PPO}}(k) + w_i^{\mathrm{pf}}(k)\,a_i^{\mathrm{PF}}(k) + w_i^{\mathrm{cons}}(k)\,a_i^{\mathrm{cons}}(k) $$
 
 #### Step 6: State update
 The agent then updates its position according to the single-integrator motion rule:
