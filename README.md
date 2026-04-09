@@ -373,7 +373,7 @@ Each agent combines three motion components:
 
 The final control input for agent $i$ is written as
 
-$$ u_i(k) = w_i^{\mathrm{ppo}}(k)\,u_i^{\mathrm{PPO}}(k) + w_i^{\mathrm{pf}}(k)\,u_i^{\mathrm{PF}}(k) + w_i^{\mathrm{cons}}(k)\,u_i^{\mathrm{cons}}(k) $$
+$$ u_i(k) = w_i^{\mathrm{ppo}}(k)\ u_i^{\mathrm{PPO}}(k) + w_i^{\mathrm{pf}}(k)\ u_i^{\mathrm{PF}}(k) + w_i^{\mathrm{cons}}(k)\ u_i^{\mathrm{cons}}(k) $$
 
 where the weights depend on the agent’s current role and local context.
 
@@ -400,7 +400,7 @@ Over a rollout horizon of $T$ timesteps, the swarm evolves by repeating the foll
 This produces a decentralized but coordinated swarm motion process:
 
 $$
-P(k+1) = \mathcal{F}\big(P(k), \phi, \mathcal{G}(k), r(k), \pi_\theta\big)
+P(k+1) = \mathcal{F}\big(P(k),\ \phi,\ \mathcal{G}(k),\ r(k),\ \pi_\ \theta\big)
 $$
 
 where $\mathcal{F}$ represents the hybrid swarm update induced by learned policy, classical fields, graph coupling, and stochastic role transitions.
