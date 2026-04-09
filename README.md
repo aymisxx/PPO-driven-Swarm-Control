@@ -400,7 +400,7 @@ Over a rollout horizon of $T$ timesteps, the swarm evolves by repeating the foll
 This produces a decentralized but coordinated swarm motion process:
 
 $$
-P(k+1) = \mathcal{F}\big(P(k),\ \phi,\ \mathcal{G}(k),\ r(k),\ \pi_\ \theta\big)
+P(k+1) = \mathcal{F}\big(P(k),\ \phi,\ \mathcal{G}(k),\ r(k),\ \pi_\theta\big)
 $$
 
 where $\mathcal{F}$ represents the hybrid swarm update induced by learned policy, classical fields, graph coupling, and stochastic role transitions.
@@ -455,67 +455,18 @@ The notebook and README both make the same central point: **raw PPO alone is ins
 
 ### 14) Modeling Summary
 
-In compact form, the framework is:
+In compact form, the framework works as follows:
 
-#### Field model
+- The environment is represented by a **normalized VARI-based vegetation field** that acts as the task landscape.
+- Each agent observes a **local 128×128 patch** around its current position.
+- A trained **PPO policy** proposes a local motion action from that observation.
+- A **potential-field term** adds attraction toward useful regions and repulsion from nearby agents and revisited areas.
+- A **consensus term** helps neighboring agents coordinate and reduce local imbalance.
+- A **stochastic role-switching mechanism** changes agent behavior over time, producing explorers, surveyors, defenders, and idle agents.
+- The final motion of each drone is a **hybrid combination** of PPO, potential fields, and consensus, with weights determined by the agent’s current role and local context.
+- The swarm is evaluated using **coverage ratio, NDVI gain, redundancy, consensus error, and spatial dispersion**.
 
-$$
-\phi(x,y) = \mathrm{normalized\ VARI\ proxy}
-$$
-
-#### Single-agent reward
-
-$$
-r_i(k) =
-\begin{cases}
-\phi(x_i(k), y_i(k)), & \text{first visit} \\
-0, & \text{otherwise}
-\end{cases}
-$$
-
-#### Agent state and motion
-
-$$
-p_i(k) =
-\begin{bmatrix}
-x_i(k) \\
-y_i(k)
-\end{bmatrix},
-\qquad
-p_i(k+1) = p_i(k) + u_i(k)
-$$
-
-#### Consensus update
-
-$$
-y_i(k+1)
-=
-y_i(k)
--
-\epsilon
-\sum_{j \in \mathcal{N}_i(k)}
-\big(y_i(k) - y_j(k)\big)
-$$
-
-#### Role switching
-
-$$
-r_i(k+1) \sim P\big(r_i(k) \rightarrow r_i(k+1)\big)
-$$
-
-#### Hybrid per-agent controller
-
-$$
-u_i(k)
-=
-w_i^{\mathrm{ppo}}(k)\,u_i^{\mathrm{PPO}}(k)
-+
-w_i^{\mathrm{pf}}(k)\,u_i^{\mathrm{PF}}(k)
-+
-w_i^{\mathrm{cons}}(k)\,u_i^{\mathrm{cons}}(k)
-$$
-
-This is the mathematical backbone of the project’s decentralized swarm behavior: **learned local action, corrected by classical multi-agent structure, modulated by adaptive roles, and evaluated through coverage-centric metrics**.
+Overall, the framework combines **learned local navigation** with **classical multi-agent coordination**, producing decentralized swarm behavior that is adaptive, structured, and coverage-oriented.
 
 ---
 
