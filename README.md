@@ -365,31 +365,29 @@ The key point is that **each agent does not always behave the same way**. Its ro
 
 ### 10) Hybrid Per-Agent Control Law
 
-Combining all layers, the per-agent motion command is modeled as
+Each agent combines three motion components:
 
-$$
-u_i(k)
-=
-w_i^{\mathrm{ppo}}(k)\,u_i^{\mathrm{PPO}}(k)
-+
-w_i^{\mathrm{pf}}(k)\,u_i^{\mathrm{PF}}(k)
-+
-w_i^{\mathrm{cons}}(k)\,u_i^{\mathrm{cons}}(k)
-$$
+- a **PPO-based local action** for learned navigation,
+- a **potential-field term** for attraction / repulsion,
+- a **consensus term** for swarm coordination.
 
-where the weights depend on the agent’s role and local context.
+The final control input for agent $i$ is written as
 
-Typical qualitative behavior described in the notebook is:
+$$ u_i(k) = w_i^{\mathrm{ppo}}(k)\,u_i^{\mathrm{PPO}}(k) + w_i^{\mathrm{pf}}(k)\,u_i^{\mathrm{PF}}(k) + w_i^{\mathrm{cons}}(k)\,u_i^{\mathrm{cons}}(k) $$
 
-- in promising, information-rich regions, PPO dominates,
-- in crowded regions, repulsion and coverage structure dominate,
-- under role switching, explorers become more RL-driven while defenders become more potential-field and consensus-driven.
+where the weights depend on the agent’s current role and local context.
 
-Thus, the swarm controller is **adaptive at the level of each individual agent**, not just globally tuned once and left frozen.
+In practice:
+
+- in promising regions, PPO tends to dominate,
+- in crowded regions, potential-field repulsion becomes more important,
+- under role switching, explorers become more PPO-driven while defenders rely more on potential fields and consensus.
+
+This makes the controller adaptive at the level of each individual agent, not just globally tuned once.
 
 ### 11) Full Swarm Update Loop
 
-Over a rollout horizon of \(T\) timesteps, the swarm evolves by repeating the following for all agents:
+Over a rollout horizon of $T$ timesteps, the swarm evolves by repeating the following for all agents:
 
 1. compute local PPO action,
 2. compute potential-field correction,
