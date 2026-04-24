@@ -64,9 +64,7 @@ The notebook is designed for **user-driven experimentation**.
 - models/
 - logs/
 
-2.  Place your own image inside as:
-
-**data/field_satellite.jpg**
+2.  Place your own image inside as: **data/field_satellite.jpg**
 
 3.  Run the notebook from Section 1 onward.
 
