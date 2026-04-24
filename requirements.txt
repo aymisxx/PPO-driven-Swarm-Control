@@ -2,11 +2,16 @@ numpy
 pandas
 matplotlib
 opencv-python
+pillow
+scipy
+networkx
 gymnasium
 stable-baselines3
-torch               # Prefer cuda-enabled TORCH if GPU-privilege exists
+torch
 tqdm
 jupyter
 imageio
 imageio-ffmpeg
 tensorboard
+pyyaml
+gradio

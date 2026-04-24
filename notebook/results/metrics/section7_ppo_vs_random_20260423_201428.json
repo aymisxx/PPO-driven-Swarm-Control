@@ -1,0 +1,62 @@
+{
+  "run_id": "20260423_201428",
+  "base_seed": 1268402206,
+  "num_episodes": 20,
+  "ppo": {
+    "mean_total_reward": 187.2817626953125,
+    "mean_unique_visited": 282.75,
+    "mean_end_utility": 0.668907544016838,
+    "mean_path_efficiency": 0.8181376112702539
+  },
+  "random": {
+    "mean_total_reward": 85.09140129089356,
+    "mean_unique_visited": 130.55,
+    "mean_end_utility": 0.6524899587035179,
+    "mean_path_efficiency": 0.0403321889778553
+  },
+  "representative_seed": 1268402206,
+  "representative_ppo": {
+    "policy": "ppo",
+    "episode_seed": 1268402206,
+    "start_position_yx": [
+      290,
+      838
+    ],
+    "end_position_yx": [
+      53,
+      775
+    ],
+    "steps": 300,
+    "total_reward": 172.81271362304688,
+    "unique_visited": 301,
+    "first_visit_steps": 300,
+    "revisit_steps": 0,
+    "mean_utility": 0.5760423541069031,
+    "end_utility": 0.540297269821167,
+    "path_length_px": 300.0,
+    "net_displacement_px": 245.2305038122297,
+    "path_efficiency": 0.8174350127074324
+  },
+  "representative_random": {
+    "policy": "random",
+    "episode_seed": 1268402206,
+    "start_position_yx": [
+      290,
+      838
+    ],
+    "end_position_yx": [
+      305,
+      833
+    ],
+    "steps": 300,
+    "total_reward": 50.569252014160156,
+    "unique_visited": 94,
+    "first_visit_steps": 93,
+    "revisit_steps": 207,
+    "mean_utility": 0.5442273616790771,
+    "end_utility": 0.5465869903564453,
+    "path_length_px": 300.0,
+    "net_displacement_px": 15.811388300841896,
+    "path_efficiency": 0.05270462766947299
+  }
+}

@@ -1,658 +1,627 @@
-# PPO-driven Swarm Control  
+# **PPO-Driven Swarm Control**  
 
-### A Hybrid Multi-Robot Framework Combining Reinforcement Learning, Consensus, Potential Fields, and CRN-Based Role Switching
+### End-to-End Rebuild of a Hybrid Multi-Robot Coverage Pipeline
 
-**Author:** Ayushman Mishra  
-**GitHub:** https://github.com/aymisxx  
+### Motivation
 
----
+This notebook develops a complete **end-to-end hybrid swarm-control pipeline** for vegetation-aware multi-agent exploration using satellite imagery. The central idea is simple but strong:
 
-## Project Overview
+> **Use reinforcement learning to learn good local motion, and use classical multi-robot systems theory to impose swarm-level structure.**
 
-This project presents a **hybrid swarm control framework** that fuses **reinforcement learning** with **classical multi-robot systems (MRS) theory** to achieve scalable, stable, and efficient multi-agent coverage.
+That means this notebook is **not** treating reinforcement learning as the entire swarm solution. Instead, it treats PPO as the **microscopic local controller**, and then augments it with **potential-field shaping**, **graph-based consensus**, and **stochastic role switching** so that the final multi-agent behavior is scalable, interpretable, and more aligned with classical multi-robot systems theory.
 
-A microscopic **PPO-based learned controller** handles local navigation using vegetation information derived from satellite imagery, while macroscopic coordination is enforced through:
-
-- Artificial **potential fields**
-- **Graph-based consensus** dynamics
-- **CRN-inspired stochastic role switching**
-
-The result is a swarm that is **adaptive, decentralized, collision-free, and theoretically grounded**.
+The project begins with a user-provided **RGB satellite image**, converts it into a **vegetation-utility field** using a **VARI-based vegetation proxy**, trains or loads a PPO agent on local image crops, and then lifts that learned policy into a decentralized swarm setting. The final result is a hybrid controller capable of producing richer collective behaviors than raw PPO replication alone.
 
 ---
 
-## Application Context
+# 1. Abstract
 
-The motivating application is **precision agriculture**:
+This notebook develops a **hybrid multi-robot coverage framework** that combines **reinforcement learning** with **classical multi-robot systems (MRS) theory**. A satellite RGB image is transformed into a normalized scalar utility map using the **Visible Atmospherically Resistant Index (VARI)**, which serves as an RGB-only vegetation proxy when near-infrared measurements are unavailable. A single-agent **Proximal Policy Optimization (PPO)** policy is trained on **local $128 \times 128$** utility crops with a **first-visit reward**, producing a decentralized learned navigation primitive that prefers informative, vegetation-rich regions while discouraging revisits.
 
-- A vegetation-rich field is represented as a **normalized NDVI proxy** (VARI-based).
-- Multiple UAVs (modeled as single-integrator agents) must **explore and cover the field efficiently**.
-- Each location yields reward **only on first visit**, discouraging redundant exploration.
+To scale this learned policy to a swarm, the notebook introduces three additional layers:
 
-This setup naturally emphasizes:
-- Coverage efficiency  
-- Spatial dispersion  
-- Redundancy reduction  
-- Robust decentralized coordination  
+1. **Artificial potential fields** for collision avoidance, revisit repulsion, boundary handling, and utility-gradient attraction,
+2. **Graph-based consensus dynamics** over a time-varying proximity graph for coordination and local disagreement reduction,
+3. **CRN-inspired stochastic role switching** to induce adaptive heterogeneity among explorers, surveyors, defenders, and idle/recovery agents.
 
----
+The final action of each robot is a **role-conditioned hybrid combination** of PPO, potential-field, and consensus terms. The framework is evaluated using **coverage ratio**, **utility gain**, **redundancy**, **consensus error**, and **spatial dispersion**, with comparisons across multiple controller regimes ranging from raw PPO to the full hybrid architecture.
 
-### **Simulation Environment**
+# 2. Core Concept and Project Positioning
 
-The custom made simulation environment used:
-> https://github.com/aymisxx/MicroUAV-2D
+## 2.1 What this project is
 
----
+This project is a **hierarchical hybrid swarm-control system** in which:
 
-## Core Contributions
+- the environment is represented as a scalar field $\phi(x,y)$,
+- each agent sees only a **local crop** of that field,
+- a PPO policy proposes a local motion tendency,
+- classical swarm-control layers modify and regularize that tendency,
+- the swarm collectively explores the field with better spacing, lower redundancy, and stronger coordination.
 
-### 1. PPO-Based Local Navigation
-- Each agent observes a **128×128 local NDVI patch**
-- A CNN-based PPO policy outputs motion commands
-- Learns vegetation-seeking behavior without global knowledge
+## 2.2 What this project is *not*
 
-### 2. Artificial Potential Fields
-- **Attraction** to high-NDVI regions  
-- **Repulsion** from nearby agents (collision avoidance)  
-- **Revisit penalty** to discourage redundant paths  
+This is **not** a vague “RL-for-swarms” demo.
+It does **not** claim that PPO alone solves scalable swarm coordination.
+It does **not** claim global optimality or a complete proof of closed-loop convergence for the full hybrid system.
 
-### 3. Graph-Based Consensus
-- Local communication graph induces Laplacian dynamics
-- Reduces swarm imbalance and excessive dispersion
-- Guarantees asymptotic consensus under standard connectivity assumptions
+Instead, the honest claim is:
 
-### 4. CRN-Inspired Role Switching
-Agents stochastically transition between roles:
-- **Explorer**: PPO-dominant, fast exploration  
-- **Surveyor**: balanced behavior  
-- **Defender**: strong repulsion and consensus  
-- **Idle**: low activity / recovery mode  
+- **RL learns local instinct**
+- **classical MRS theory enforces structure**
+- **hybridization is the real contribution**
 
-Role transitions depend on local density and coverage metrics, inspired by **Chemical Reaction Networks (CRNs)**.
+## 2.3 Application framing
 
----
+Primary application narrative:
 
-## Mathematical Modeling
+- **precision agriculture**
+- **vegetation-aware multi-UAV coverage**
+- **distributed inspection of scalar utility fields**
 
-This project formulates swarm coverage as a **hybrid multi-agent control problem** over a vegetation field derived from satellite imagery. The framework combines:
+Secondary application narratives:
 
-1. a **VARI-based NDVI proxy field** as the task landscape,
-2. a **single-agent PPO navigation policy** trained from local observations,
-3. **multi-agent single-integrator swarm dynamics**,
-4. **artificial potential fields** for coverage spread and collision avoidance,
-5. **graph-based consensus** for decentralized coordination, and
-6. **CRN-inspired stochastic role switching** for adaptive swarm heterogeneity.
+- environmental monitoring
+- search and exploration
+- utility-driven distributed inspection
+- mapping-inspired multi-agent exploration
 
-The result is a decentralized swarm controller in which learning provides local intelligence, while classical multi-robot systems theory provides structure, safety, and coordination.
+# 3. Research Idea in One Sentence
 
-### 1) Vegetation Field as the Task Landscape
+We learn a decentralized local controller from image patches using PPO, then augment it with interpretable swarm mechanisms so that **local intelligence + macroscopic coordination** produces better multi-agent coverage than raw policy replication.
 
-The environment is built from a satellite RGB image. Since true NDVI requires a near-infrared channel, the notebook uses a **VARI-based vegetation proxy** instead:
+# 4. Theoretical Foundations
+
+This notebook is deliberately aligned with core MRS themes:
+
+- **coverage in space and time**
+- **agreement / consensus**
+- **division of labor**
+- **goal-oriented motion**
+- **pattern formation**
+- **decentralized control under local sensing**
+- **graph-based interaction models**
+- **potential-field-based coverage**
+- **stochastic role/task transitions**
+
+The architecture is best understood as a synthesis of:
+
+1. **single-integrator mobile robot dynamics**,  
+2. **scalar-field exploration**,  
+3. **graph consensus**,  
+4. **artificial potential functions**,  
+5. **stochastic task allocation / role evolution**,  
+6. **geometric swarm analysis**.
+
+# 5. Mathematical Model
+
+## 5.1 Environment as a scalar utility field
+
+Let the user provide an RGB satellite image
 
 $$
-\mathrm{VARI} = \frac{G - R}{G + R - B + \varepsilon}
+I(x,y) = \big(R(x,y), G(x,y), B(x,y)\big), \qquad R,G,B \in [0,1].
+$$
+
+Since we only assume RGB imagery, we do **not** compute true NDVI.
+Instead, we compute the **VARI-based vegetation proxy**
+
+$$
+\text{VARI}(x,y) = \frac{G(x,y) - R(x,y)}{G(x,y) + R(x,y) - B(x,y) + \varepsilon},
+$$
+
+where $\varepsilon > 0$ prevents numerical instability.
+
+This is then clipped and normalized into a utility field
+
+$$
+\phi(x,y) = \frac{\text{VARI}(x,y) - \text{VARI}_{\min}}
+{\text{VARI}_{\max} - \text{VARI}_{\min} + \varepsilon},
+\qquad \phi(x,y) \in [0,1].
+$$
+
+### Interpretation of $\phi(x,y)$
+
+- high $\phi$: vegetation-rich / informative region  
+- low $\phi$: low utility region  
+- $\phi$ acts simultaneously as:
+  - reward landscape,
+  - perceptual substrate,
+  - swarm-level coverage objective.
+
+### Optional preprocessing
+
+To stabilize downstream behavior, the pipeline may apply:
+
+- Gaussian smoothing,
+- percentile clipping,
+- contrast normalization,
+- downsampling,
+- optional masking of text/borders/legends.
+
+## 5.2 Agent dynamics
+
+Each robot is modeled as a 2D point agent with **discrete-time single-integrator dynamics**
+
+$$
+p_i(k+1) = p_i(k) + \Delta t\, u_i(k),
 $$
 
 where:
 
-- $R, G, B$ are the normalized red, green, and blue image channels,
-- $\varepsilon$ is a small constant for numerical stability.
+- $p_i(k) \in \mathbb{R}^2$: position of agent $i$ at step $k$,
+- $u_i(k) \in \mathbb{R}^2$: control input / velocity command,
+- $\Delta t$: simulation timestep.
 
-The resulting VARI map is clipped and normalized to $[0,1]$, producing a scalar field
+This is the correct abstraction for a swarm-layer notebook because it is simple, interpretable, and standard in multi-robot coordination theory.
 
-$$
-\phi(x,y) \in [0,1]
-$$
+## 5.3 Local observation model
 
-that acts as the environment’s **vegetation / utility map**.
-
-This normalized field is referred to throughout the project as the **NDVI proxy** or `ndvi_field`, and it serves three roles simultaneously:
-
-- the source of reward,
-- the local perceptual input seen by each drone,
-- the global landscape over which the swarm spreads.
-
-### 2) Single-Agent State, Observation, and Motion Model
-
-Each drone is modeled as a **point agent** moving on a 2D grid over the vegetation field.
-
-For an agent $i$, its position is
+Each agent does **not** observe the full map.
+Instead, agent $i$ at position $p_i(k)$ receives a **local crop**
 
 $$
-p_i(k) =
-\begin{bmatrix}
-x_i(k) \\
-y_i(k)
-\end{bmatrix}
-\in \mathbb{Z}^2
+o_i(k) \in \mathbb{R}^{1 \times P \times P},
 $$
 
-at discrete time step $k$.
+with $P=128$ by default.
 
-The single-agent action space is discrete:
+This design is important because it:
 
-- $0 \rightarrow$ up
-- $1 \rightarrow$ right
-- $2 \rightarrow$ down
-- $3 \rightarrow$ left
+- enforces **partial observability**,
+- makes PPO genuinely **decentralized**,
+- preserves a realistic gap between local sensing and global analysis.
 
-This matches the notebook’s control abstraction and is explicitly tied to a **single-integrator motion model** in the project description.
+## 5.4 Reward design for PPO
 
-At each step, the agent receives a local observation patch centered on its current position:
-
-$$
-o_i(k) \in \mathbb{R}^{1 \times 128 \times 128}
-$$
-
-This patch is a **128×128 local crop** of the NDVI proxy field, zero-padded near boundaries and returned as a single-channel image. Thus, each agent acts only on **local perceptual information**, not full-map omniscience.
-
-### 3) Single-Agent Reward and Exploration Objective
-
-A boolean visit-history map is maintained over the field. If agent $i$ moves into cell $(x,y)$, its reward is
+Let $V$ denote the visit map.
+If the agent reaches cell $c_k$ at time step $k$, define
 
 $$
-r_i(k) =
+r(k) =
 \begin{cases}
-\phi(x,y), & \text{if cell } (x,y) \text{ is visited for the first time} \\
-0, & \text{otherwise}
+\phi(c_k), & \text{if } c_k \text{ is visited for the first time},\\
+0, & \text{otherwise}.
 \end{cases}
 $$
 
-This first-visit reward structure is crucial. It means the objective is not merely “go toward green pixels,” but rather:
+This reward is elegant because it jointly encourages:
 
-- seek high-value vegetation regions,
-- avoid wasteful revisits,
-- spread coverage across the environment.
+- exploration,
+- preference for useful regions,
+- reduction of trivial revisits,
+- implicit coverage behavior.
 
-So even before adding explicit swarm couplings, the reward already contains an implicit pressure toward **coverage efficiency** and **dispersion**.
+The baseline reward remains **first-visit utility reward**.  
+That is the cleanest reward for the first version.
 
-### 4) PPO as the Microscopic Local Controller
+## 5.5 PPO microscopic controller
 
-A PPO policy is trained in the single-agent environment using the local NDVI patch observation. The learned policy produces a local motion proposal:
-
-$$
-a_i^{\mathrm{PPO}}(k) = \pi_\theta(o_i(k))
-$$
-
-where:
-
-- $\pi_\theta$ is the trained PPO policy,
-- $o_i(k)$ is the local 128×128 observation patch,
-- $a_i^{\mathrm{PPO}}(k)$ is the action proposed by the learned controller.
-
-Conceptually, this PPO component acts as the **microscopic instinct layer** of the swarm:
-
-- it learns local vegetation-seeking behavior,
-- it reacts to local gradients and coverage opportunities,
-- it does not by itself reason about multi-agent coupling, global balance, or collision avoidance.
-
-That is why PPO alone performs well for single-agent exploration, but degrades when scaled directly to many agents.
-
-### 5) Multi-Agent Swarm State
-
-Once lifted into the swarm setting, the system consists of $N$ drones:
+Let the trained PPO policy be
 
 $$
-\mathcal{V} = \{1,2,\dots,N\}
+\pi_\theta(o_i(k)) = a_i^{\text{ppo}}(k),
 $$
 
-with positions
+where the discrete action is one of:
 
 $$
-p_i(k) =
-\begin{bmatrix}
-x_i(k) \\
-y_i(k)
-\end{bmatrix},
-\qquad i \in \mathcal{V}
+\{\text{up}, \text{right}, \text{down}, \text{left}\}.
 $$
 
-All agents share:
-
-- the same global vegetation field $\phi(x,y)$,
-- a global visit-history / coverage map,
-- decentralized local observations extracted from their own positions.
-
-The swarm state at time $k$ is therefore the collection
+For hybrid composition, this discrete action is mapped into a continuous direction vector
 
 $$
-P(k) = \{p_1(k), p_2(k), \dots, p_N(k)\}
+d_i^{\text{ppo}}(k) \in \mathbb{R}^2.
 $$
 
-along with coverage history, role assignments, and any consensus variables maintained locally by the agents.
-
-### 6) How Each Agent Operates in the Hybrid Framework
-
-At every swarm timestep, **each agent executes the same decentralized update pipeline**, but with its own local observation, neighborhood, and role.
-
-For drone $i$, the hybrid update works as follows:
-
-#### Step 1: Local PPO proposal
-
-The agent extracts its local NDVI patch and computes
+Then the PPO contribution to motion becomes
 
 $$
-a_i^{\mathrm{PPO}}(k)
+u_i^{\text{ppo}}(k) = \alpha_{\text{ppo}}(i,k)\, d_i^{\text{ppo}}(k),
 $$
 
-from the trained PPO policy.
+where $\alpha_{\text{ppo}}(i,k)$ may depend on role and local context.
 
-#### Step 2: Potential-field correction
+## 5.6 Proximity graph and consensus layer
 
-The agent computes a classical potential-field motion term
-
-$$
-a_i^{\mathrm{PF}}(k)
-$$
-
-which combines:
-
-- attraction toward useful vegetation / high-value regions,
-- repulsion from nearby drones,
-- repulsion from already visited regions,
-- local density-based dispersion pressure.
-
-#### Step 3: Consensus correction
-Using nearby neighbors in the interaction graph, the agent computes a consensus-driven adjustment
+At each timestep, define a time-varying proximity graph
 
 $$
-a_i^{\mathrm{cons}}(k)
+G(k) = (V, E(k)),
 $$
 
-that nudges it toward globally better-balanced swarm behavior.
-
-#### Step 4: Role-based modulation
-The agent’s current role $r_i(k)$ modifies the relative weight of PPO, potential fields, and consensus.
-
-#### Step 5: Final hybrid action
-The resulting action is a weighted blend:
-
-$$ a_i^{\mathrm{hybrid}}(k) = w_i^{\mathrm{ppo}}(k)\ a_i^{\mathrm{PPO}}(k) + w_i^{\mathrm{pf}}(k)\ a_i^{\mathrm{PF}}(k) + w_i^{\mathrm{cons}}(k)\ a_i^{\mathrm{cons}}(k) $$
-
-#### Step 6: State update
-The agent then updates its position according to the single-integrator motion rule:
+with edge rule
 
 $$
-p_i(k+1) = p_i(k) + a_i^{\mathrm{hybrid}}(k)
+(i,j) \in E(k)
+\quad \Longleftrightarrow \quad
+\|p_i(k) - p_j(k)\| \le R_{\text{comm}}.
 $$
 
-subject to environment boundary clipping and any implementation-specific collision-avoidance adjustments.
+Let:
 
-So each drone is neither purely learned nor purely hand-coded. It is a **hybrid local controller** whose motion emerges from the combination of learned policy, safety/dispersion fields, graph coordination, and adaptive role logic.
+- $A(k)$: adjacency matrix  
+- $D(k)$: degree matrix  
+- $L(k) = D(k) - A(k)$: graph Laplacian  
 
-### 7) Artificial Potential Field Model
-
-The artificial potential field layer provides classical swarm structure. For each agent $i$, the potential-field action is built from attractive and repulsive terms:
-
-$$
-a_i^{\mathrm{PF}} = a_i^{\mathrm{att}} + a_i^{\mathrm{rep}}
-$$
-
-where the attractive part encourages movement toward useful terrain and the repulsive part discourages clustering and redundancy.
-
-#### Attractive terms
-
-These are associated with vegetation-rich / task-relevant regions. High NDVI zones act like useful potential valleys or targets.
-
-#### Repulsive terms
-Repulsion is applied against:
-
-- nearby drones,
-- already visited cells,
-- dense local neighborhoods.
-
-This layer is what gives the swarm its “don’t pile up like confused pigeons” behavior. PPO supplies desire, potential fields supply manners.
-
-### 8) Graph-Based Consensus Dynamics
-
-A local communication graph is built at each timestep. Two agents are connected if they lie within a communication radius $R$, giving a time-varying interaction graph
-
-$$ G(k) = (\mathcal{V}, \mathcal{E}(k)) $$
-
-with neighbor set $N_i(k)$ for agent $i$.
-
-Each drone maintains a local scalar coordination variable $y_i(k)$, such as a local coverage score or imbalance metric. A simple consensus update is then applied:
-
-$$ y_i(k+1) = y_i(k) - \epsilon \sum_{j \in N_i(k)} \big(y_i(k) - y_j(k)\big) $$
-
-where $\epsilon > 0$ is the consensus step size.
-
-This update reduces disagreement between neighboring agents and helps the swarm balance coverage, avoid fragmentation, and spread more coherently.
-
-### 9) CRN-Inspired Role Switching
-
-Each agent is also assigned a discrete role
+A classical consensus-style term is
 
 $$
-r_i(k) \in \{\text{Explorer}, \text{Surveyor}, \text{Defender}, \text{Idle}\}
+u_i^{\text{cons}}(k)
+= k_{\text{cons}} \sum_{j \in \mathcal{N}_i(k)} \big(p_j(k)-p_i(k)\big).
 $$
 
-that evolves stochastically over time.
+However, raw position consensus can collapse the swarm, so it must be used carefully.  
+A more coverage-friendly alternative is to run consensus on a local information state \(y_i\), such as:
 
-The notebook describes role evolution as:
+- local utility imbalance,
+- frontier score,
+- local under-coverage estimate,
+- preferred heading.
+
+Then
 
 $$
-r_i(k+1) \sim P\big(r_i(k) \rightarrow r_i(k+1)\big)
+y_i(k+1)
+=
+y_i(k) -
+\epsilon
+\sum_{j\in \mathcal{N}_i(k)}
+\big(y_i(k)-y_j(k)\big).
 $$
 
-where the transition probabilities depend on local swarm state, such as:
+The role of consensus here is **coordination smoothing**, not rendezvous.
 
-- coverage,
-- local density,
-- NDVI conditions.
+## 5.7 Potential-field layer
 
-This CRN-inspired role process creates decentralized functional specialization.
+Define a potential-field contribution
 
-#### Explorer
+$$
+u_i^{\text{pf}} = F_i^{\text{att}} + F_i^{\text{rep}} + F_i^{\text{visit}} + F_i^{\text{bnd}}.
+$$
+
+### (a) Utility-gradient attraction
+
+$$
+F_i^{\text{att}} = k_{\text{att}} \nabla \phi(p_i).
+$$
+
+This encourages motion toward locally increasing utility.
+
+### (b) Inter-agent repulsion
+
+For neighbors inside repulsion radius \(R_{\text{rep}}\),
+
+$$
+F_i^{\text{rep}}
+= \sum_j
+k_{\text{rep}}\,
+\psi(\|p_i-p_j\|)
+\frac{p_i-p_j}{\|p_i-p_j\|+\varepsilon},
+$$
+
+where a simple choice is
+
+$$
+\psi(r) = \max\left(0,\frac{1}{r}-\frac{1}{R_{\text{rep}}}\right).
+$$
+
+This discourages clustering and near-collision behavior.
+
+### (c) Visited-region repulsion
+
+Let $M_{\text{visit}}$ be a visit-density map.
+Then
+
+$$
+F_i^{\text{visit}} = -k_{\text{visit}} \nabla M_{\text{visit}}(p_i),
+$$
+
+which pushes agents away from heavily revisited regions.
+
+### (d) Boundary repulsion
+
+A soft inward force is added near image boundaries to prevent pathological edge-sticking without relying only on hard clipping.
+
+## 5.8 CRN-inspired stochastic role switching
+
+Each agent has a role
+
+$$
+\text{role}_i(k) \in
+\{\text{Explorer}, \text{Surveyor}, \text{Defender}, \text{Idle}\}.
+$$
+
+Role evolution is modeled as a state-dependent stochastic process:
+
+$$
+\Pr\!\left(\text{role}_i(k+1)=r' \mid \text{role}_i(k)=r,\; z_i(k)\right)
+= P_{r\to r'}(z_i(k)),
+$$
+
+where $z_i(k)$ is a local context vector that may include:
+
+- local mean utility,
+- local utility gradient magnitude,
+- neighborhood density,
+- revisit intensity,
+- recent displacement,
+- optional future battery/load placeholders.
+
+This is **CRN-inspired**, not a claim of exact chemical-kinetics derivation.  
+The right interpretation is:
+
+- roles act like internal species,
+- transitions act like stochastic reactions,
+- aggregate role populations can be studied statistically over time.
+
+## 5.9 Hybrid control law
+
+The final swarm controller is
+
+$$
+u_i(k) =
+w_{\text{ppo}}(i,k)\,u_i^{\text{ppo}}(k)
++
+w_{\text{pf}}(i,k)\,u_i^{\text{pf}}(k)
++
+w_{\text{cons}}(i,k)\,u_i^{\text{cons}}(k).
+$$
+
+The weights are role-dependent and context-dependent.
+
+### Example role tendencies
+
+**Explorer**
 - high PPO weight,
-- weak consensus influence,
-- stronger drive for aggressive exploration.
+- moderate utility attraction,
+- weak consensus,
+- moderate repulsion.
 
-#### Surveyor
-- balanced behavior,
-- moderate PPO and potential-field participation.
+**Surveyor**
+- balanced PPO and PF,
+- moderate consensus,
+- strong anti-revisit pressure.
 
-#### Defender
-- stronger repulsion,
-- stronger consensus participation,
-- lower-speed stabilizing behavior.
+**Defender**
+- low PPO,
+- strong repulsion,
+- stronger local stabilization / spacing preservation.
 
-#### Idle / Resupply
-- weak motion or recovery-like tendency,
-- can act as a low-activity state.
+**Idle / Recovery**
+- small motion magnitude,
+- weak random-walk or reset-like behavior,
+- useful for reducing deterministic deadlocks.
 
-The key point is that **each agent does not always behave the same way**. Its role changes the hybrid controller weights, which lets the swarm adapt its behavioral composition over time.
-
-### 10) Hybrid Per-Agent Control Law
-
-Each agent combines three motion components:
-
-- a **PPO-based local action** for learned navigation,
-- a **potential-field term** for attraction / repulsion,
-- a **consensus term** for swarm coordination.
-
-The final control input for agent $i$ is written as
-
-$$ u_i(k) = w_i^{\mathrm{ppo}}(k)\ u_i^{\mathrm{PPO}}(k) + w_i^{\mathrm{pf}}(k)\ u_i^{\mathrm{PF}}(k) + w_i^{\mathrm{cons}}(k)\ u_i^{\mathrm{cons}}(k) $$
-
-where the weights depend on the agent’s current role and local context.
-
-In practice:
-
-- in promising regions, PPO tends to dominate,
-- in crowded regions, potential-field repulsion becomes more important,
-- under role switching, explorers become more PPO-driven while defenders rely more on potential fields and consensus.
-
-This makes the controller adaptive at the level of each individual agent, not just globally tuned once.
-
-### 11) Full Swarm Update Loop
-
-Over a rollout horizon of $T$ timesteps, the swarm evolves by repeating the following for all agents:
-
-1. compute local PPO action,
-2. compute potential-field correction,
-3. compute consensus correction,
-4. apply role-based weighting/modification,
-5. update agent position,
-6. update global visit / coverage map,
-7. log swarm metrics and trajectories.
-
-This produces a decentralized but coordinated swarm motion process:
+After combination, the final control is clipped:
 
 $$
-P(k+1) = \mathcal{F}\big(P(k),\ \phi,\ \mathcal{G}(k),\ r(k),\ \pi_\theta\big)
+u_i \leftarrow \text{sat}_{u_{\max}}(u_i).
 $$
 
-where $\mathcal{F}$ represents the hybrid swarm update induced by learned policy, classical fields, graph coupling, and stochastic role transitions.
+Then positions are updated via the single-integrator law.
 
-### 12) Metrics Used to Evaluate the Model
+## 5.10 Optional safety refinement
 
-The notebook defines several swarm-level metrics to evaluate the resulting dynamics.
-
-#### Coverage Ratio
+A version-2 extension may project the nominal hybrid control through a local optimization layer:
 
 $$
-\mathrm{Coverage} = \frac{|V_{\mathrm{visited}}|}{|V_{\mathrm{total}}|}
+\min_{u_i} \|u_i - u_i^{\text{nom}}\|^2
 $$
 
-This measures how much of the field the swarm actually explores.
+subject to pairwise safety constraints or control-barrier-type inequalities.
 
-#### NDVI Gain
-The total first-visit NDVI harvested over the episode measures how effectively the swarm seeks valuable terrain.
+This is an **optional refinement**, not a version-1 assumption.
 
-#### Redundancy Index
-This captures revisit waste. High redundancy means poor dispersion and excessive overlap.
+# 6. Why a Hybrid Controller is Necessary
 
-#### Consensus Error
+Pure PPO is expected to work well at the **single-agent** level, because it can learn local utility-seeking motion from image patches.
+
+But raw PPO replication to many agents typically creates predictable failure modes:
+
+- clustering,
+- overlapping trajectories,
+- repeated revisits,
+- poor spatial partitioning,
+- weak coordination as swarm size grows.
+
+Classical swarm-control layers address exactly these weaknesses:
+
+- **potential fields** improve spacing and anti-collision behavior,
+- **consensus** improves coordination and local agreement,
+- **role switching** adds adaptive heterogeneity,
+- **geometric/statistical metrics** make the swarm behavior measurable.
+
+So the notebook hypothesis is:
+
+> **Pure RL learns local behavior; hybrid RL + MRS theory produces better swarm behavior.**
+
+# 7. Notebook Roadmap
+
+This notebook will be built as a logically staged pipeline.
+
+## Section 0: Motivation and roadmap
+We state the problem, the hybrid thesis, and the end-to-end pipeline.
+
+## Section 1: Imports, paths, seeds, device, config
+We set up reproducibility, device handling, directories, and global configuration.
+
+## Section 2: Image ingestion and utility-map generation
+We load a satellite image, compute the VARI field, normalize it, optionally smooth/downsample it, and inspect the resulting scalar field.
+
+## Section 3: Single-agent Gymnasium environment
+We construct the custom environment, define the observation crop, action space, first-visit reward, visit map, and rendering logic.
+
+## Section 4: PPO setup
+We define the CNN-based PPO model, vectorized environment wrapper, and training configuration.
+
+## Section 5: PPO training
+We train the single-agent policy and save checkpoints and logs.
+
+## Section 6: PPO evaluation
+We compare trained PPO against simple baselines and inspect rollout quality, trajectory structure, and utility harvested.
+
+## Section 7: Transition to the swarm setting
+We explain why naïve multi-agent PPO replication is insufficient and define the shared multi-agent bookkeeping.
+
+## Section 8: Multi-agent initialization and shared maps
+We initialize $N$ agents, shared visit memory, and optional communication graph visualization.
+
+## Section 9: Potential-field module
+We derive and implement utility attraction, inter-agent repulsion, revisit repulsion, and boundary handling.
+
+## Section 10: Consensus module
+We build the proximity graph, compute adjacency and Laplacian matrices, and implement a bounded coordination term.
+
+## Section 11: Role-switching module
+We define the roles, local context features, stochastic transition law, and diagnostics for role evolution.
+
+## Section 12: Hybrid controller assembly
+We combine PPO, PF, and consensus into a single role-conditioned controller.
+
+## Section 13: Full swarm rollout
+We run the full simulation, update states and roles, track metrics, and store swarm trajectories.
+
+## Section 14: Visualization suite
+We render:
+- trajectory overlays,
+- role-colored rollouts,
+- visit-count heatmaps,
+- coverage curves,
+- consensus diagnostics,
+- role-population dynamics,
+- animation outputs.
+
+## Section 15: Ablations
+We compare:
+- random multi-agent baseline,
+- raw PPO replication,
+- PPO + PF,
+- PPO + PF + consensus,
+- PPO + PF + consensus + roles.
+
+## Section 16: Parameter sweeps
+We study sensitivity to:
+- number of agents,
+- communication radius,
+- repulsion gain,
+- attraction gain,
+- consensus gain,
+- role-switch period.
+
+## Section 17: Discussion and theory alignment
+We identify what PPO learns, where it fails, which classical layers fix what, and which claims remain empirical rather than formally proved.
+
+## Section 18: Export and handoff
+We save plots, animations, metrics, configs, and backend outputs later reused by deployment code.
+
+# 8. Expected Outcomes
+
+## 8.1 Single-agent PPO
+Expected behavior:
+
+- trajectories drift toward higher-utility regions,
+- returns improve over training,
+- visited cells have higher average utility than random baseline,
+- the policy learns a meaningful local exploration instinct.
+
+## 8.2 Raw multi-agent PPO
+Expected failure modes:
+
+- agent clustering,
+- overlap,
+- revisit-heavy trajectories,
+- poor spatial spread.
+
+## 8.3 PPO + potential fields
+Expected improvements:
+
+- better dispersion,
+- fewer close approaches,
+- reduced revisit concentration,
+- improved coverage geometry.
+
+## 8.4 PPO + PF + consensus
+Expected improvements:
+
+- smoother coordination,
+- lower local imbalance,
+- stronger regional deployment consistency.
+
+## 8.5 Full hybrid with roles
+Expected improvements:
+
+- best exploration/exploitation balance,
+- adaptive behavior in dense vs sparse regions,
+- emergent specialization,
+- strongest overall coverage-quality tradeoff.
+
+# 9. Metrics to be Reported
+
+Primary metrics:
 
 $$
-E(k) = \sum_{i=1}^{N} \big(y_i(k) - \bar{y}(k)\big)^2
+\text{Coverage Ratio} = \frac{\text{unique visited cells}}{\text{total cells}}
 $$
 
-where $\bar{y}(k)$ is the swarm mean of the consensus variable.
+$$
+\text{Utility Gain} = \sum_{\text{first visits}} \phi(c)
+$$
 
-This measures how well the swarm synchronizes its decentralized local state.
+$$
+\text{Redundancy Index} = \frac{\text{revisit count}}{\text{total steps}}
+$$
 
-#### Spatial Dispersion
-Pairwise agent distances and related spread measures quantify how well the swarm distributes itself spatially.
+Additional metrics:
 
-### 13) Why This Mathematical Model Fits the Project
+- mean pairwise distance,
+- coverage entropy,
+- consensus error,
+- role occupancy fractions,
+- connected-component statistics of the communication graph,
+- optional algebraic connectivity $\lambda_2(L)$,
+- optional Voronoi-based coverage proxies.
 
-This formulation is strong because it aligns three layers cleanly:
+# 10. Expected Final Outputs of the Notebook
 
-- **task landscape** through the NDVI proxy field,
-- **local intelligence** through PPO,
-- **swarm structure** through potential fields, consensus, and role switching.
+By the end of this notebook, we expect to produce:
 
-It also stays honest about what the project is:
+- the original satellite image,
+- the processed VARI/utility map,
+- trained PPO checkpoints,
+- single-agent evaluation plots,
+- raw multi-agent PPO rollouts,
+- hybrid swarm rollouts,
+- trajectory overlays,
+- visit-count heatmaps,
+- coverage and redundancy curves,
+- role-evolution plots,
+- parameter-sweep visualizations,
+- saved metrics in CSV/JSON form,
+- reusable backend logic for deployment.
 
-- a decentralized coverage-control framework,
-- not a full aerodynamic UAV flight simulator,
-- not a centralized planner,
-- not pure RL chaos-ball.
+# 11. Honest Technical Boundaries
 
-The notebook and README both make the same central point: **raw PPO alone is insufficient for scalable swarm coordination**, while the hybrid model gives better coverage, lower redundancy, stronger spatial organization, and more interpretable collective behavior.
+This notebook will stay technically honest about the following points:
 
-### 14) Modeling Summary
+1. **VARI is not true NDVI.**  
+   It is an RGB-derived vegetation proxy.
 
-In compact form, the framework works as follows:
+2. **The full hybrid system is not claimed to have a complete global proof.**  
+   Individual components are theory-grounded; the composed system is primarily justified empirically.
 
-- The environment is represented by a **normalized VARI-based vegetation field** that acts as the task landscape.
-- Each agent observes a **local 128×128 patch** around its current position.
-- A trained **PPO policy** proposes a local motion action from that observation.
-- A **potential-field term** adds attraction toward useful regions and repulsion from nearby agents and revisited areas.
-- A **consensus term** helps neighboring agents coordinate and reduce local imbalance.
-- A **stochastic role-switching mechanism** changes agent behavior over time, producing explorers, surveyors, defenders, and idle agents.
-- The final motion of each drone is a **hybrid combination** of PPO, potential fields, and consensus, with weights determined by the agent’s current role and local context.
-- The swarm is evaluated using **coverage ratio, NDVI gain, redundancy, consensus error, and spatial dispersion**.
+3. **CRN language is used as inspiration, not overclaimed as an exact derivation.**
 
-Overall, the framework combines **learned local navigation** with **classical multi-agent coordination**, producing decentralized swarm behavior that is adaptive, structured, and coverage-oriented.
+4. **Consensus must be used carefully.**  
+   Naïve position consensus can collapse the swarm, so bounded or information-based consensus is preferred.
 
----
+5. **Potential fields can introduce local minima.**  
+   Here they are used as shaping terms around PPO, not as the only controller.
 
-## Experimental Validation
+# 12. Final Thesis of the Notebook
 
-Five regimes are evaluated:
+The main scientific message of this notebook is:
 
-1. Single-agent PPO  
-2. Multi-agent PPO (no coordination)  
-3. PPO + Potential Fields  
-4. PPO + PF + Consensus  
-5. **Full Hybrid: PPO + PF + Consensus + Role Switching**
+> **Pure reinforcement learning is strong at learning local navigation from raw local observations, but weak at scalable multi-agent coordination. Classical multi-robot systems theory is strong at providing structure, spacing, agreement, and interpretable collective behavior, but can be brittle when used alone. The most compelling controller is therefore hybrid: learned microscopic intelligence plus principled macroscopic coordination.**
 
-### Key Findings:
-- Raw PPO swarms cluster and revisit excessively  
-- Potential fields improve dispersion  
-- Consensus reduces coverage imbalance  
-- **Full hybrid controller achieves best coverage, lowest redundancy, and strongest spatial organization**
-
-Metrics include:
-- Coverage ratio  
-- NDVI harvested  
-- Redundancy index  
-- Consensus error  
-- Role distribution dynamics  
-
----
-
-## Folder Structure
-
-```
-PPO-driven Swarm Control
-├── data/
-│   ├── field_satellite.jpg
-│   └── ndvi_field.npy
-├── models/
-│   └── ppo_ndvi_drone.zip
-├── results/
-│  (trajectory plots)
-├── report/
-│   └── PPO_driven_Swarm_Control_Report.pdf
-├── PPO_Driven_Swarm_Control (Notebook).ipynb
-├── PPO_Driven_Swarm_Control (PDF).pdf
-├── requirements.txt
-└── README.md
-```
-
-The notebook (**PPO_Driven_Swarm_Control (Notebook).ipynb**) is **fully standalone and reproducible**, starting from NDVI extraction and ending with full swarm simulations. '**results**' contains the hybrid rollout trajectory video. '**report**' folder contains the project report.
-
----
-
-## Dependencies
-
-- Python 3.9+  
-- NumPy  
-- OpenCV  
-- Matplotlib  
-- Gymnasium  
-- PyTorch  
-- Stable-Baselines3  
-
-GPU acceleration (CUDA) is supported but optional.
-
----
-
-## How to Run
-
-1. Place a satellite image in `data/field_satellite.jpg`
-2. Open the notebook:
-   ```bash
-   PPO_driven_Swarm_Control (Notebook).ipynb
-   ```
-3. Run all cells sequentially:
-   - NDVI generation
-   - PPO training
-   - Multi-agent hybrid simulation
-4. Outputs (plots, GIFs, metrics) are saved to `results/`
-
-If you wish to look at the project without running the notebook/codes, kindly open **PPO_Driven_Swarm_Control (PDF).pdf**
-
----
-
-## Key Takeaway
-
-This project demonstrates that **reinforcement learning alone is insufficient for scalable swarm coordination**.  
-By embedding PPO inside a **theoretically grounded MRS framework**, we obtain:
-
-> Learning with structure.  
-> Adaptivity with guarantees.  
-> Emergence without chaos.
-
----
-
-## Results & Analysis
-
-The proposed hybrid swarm-control framework was evaluated through extensive simulations on a vegetation-driven coverage task. Performance was analyzed by progressively enabling coordination layers on top of a PPO-based local controller.
-
-### Experimental Regimes
-
-Five control configurations were compared:
-
-- Single-Agent PPO
-
-- Multi-Agent PPO (no coordination)
-
-- PPO + Potential Fields (PF)
-
-- PPO + PF + Consensus
-
-- Full Hybrid: PPO + PF + Consensus + CRN Role Switching
-
-All experiments used identical NDVI fields, swarm sizes, episode lengths, and initialization distributions to ensure fair comparison.
-
-### Final Hybrid Swarm Rollout
-
-Hybrid swarm controller combining PPO policy with artificial potential fields, consensus dynamics, and stochastic role switching.
-
-![Swarm Demo](results/final_hybrid_rollout.gif)
-
-### Coverage Performance
-
-- **Single-agent PPO** successfully learns vegetation-seeking behavior but is inherently limited in spatial coverage.
-- **Multi-agent PPO without coordination** exhibits significant clustering and redundant trajectories, resulting in poor marginal gains as swarm size increases.
-- **Potential field integration** improves agent dispersion and collision avoidance, increasing overall coverage.
-- **Consensus dynamics** further balance spatial distribution, reducing over-exploration of local regions.
-- The **full hybrid controller** achieves the highest coverage ratio by efficiently spreading agents across the environment while prioritizing high-NDVI regions.
-
-### Redundancy & Dispersion
-
-- **Raw PPO swarms** suffer from high revisit rates and overlapping trajectories.
-- **Potential-field repulsion** significantly reduces close-proximity interactions.
-- **Consensus terms** smooth swarm motion and prevent fragmentation.
-- **CRN-based role switching** introduces functional heterogeneity, further reducing redundancy by dynamically reallocating agents to exploration-heavy or stabilization-focused roles.
-
-**Overall, the full hybrid system consistently demonstrates the lowest redundancy index and the most uniform spatial dispersion.**
-
-### Consensus Convergence
-
-- Swarms with **consensus-enabled controllers** exhibit rapid decay of consensus error.
-- Empirical convergence behavior aligns closely with **theoretical guarantees** derived from Laplacian-based analysis.
-- Consensus improves **global coordination** without enforcing rigid formations, preserving exploration flexibility.
-
----
-
-### Role Distribution Dynamics
-
-- **CRN-inspired stochastic role switching** yields stable population-level role distributions.
-- **Explorer agents** dominate early exploration phases, while **surveyor and defender roles** increase as local density and coverage rise.
-- This adaptive redistribution improves **robustness** and prevents long-term stagnation.
-
----
-
-### Qualitative Observations
-
-Trajectory visualizations and time-lapse videos reveal clear qualitative differences:
-
-- **PPO-only swarms** appear chaotic and locally greedy.
-- **Hybrid swarms** exhibit smooth, structured, and interpretable collective motion.
-- The **full hybrid controller** produces emergent behaviors such as territory splitting, wave-like dispersion, and coverage-front propagation.
-
-> Minor boundary accumulation observed in earlier runs was found to be a transient effect of initialization and stochastic policy execution; upon rerunning the simulation with updated parameters, the swarm exhibited uniform coverage without persistent boundary clustering.
-
-### Limitations
-
-While the swarm exhibits strong dispersion and collision avoidance during early exploration, performance degrades over longer horizons. As coverage saturates and NDVI gradients weaken, PPO-driven actions can dominate the hybrid controller, reducing the effectiveness of fixed-gain potential-field repulsion. This occasionally leads to local clustering and near-collisions midway through the simulation.
-
-Additionally, the learned PPO policy is not explicitly safety-aware and relies on classical control layers for collision avoidance. In dense regions, static potential-field gains and stochastic role switching may be insufficient to counter aggressive learned motions, suggesting the need for adaptive gain scheduling or safety-aware policy training in future work.
-
-### Key Takeaways
-
-- Reinforcement learning alone is insufficient for scalable swarm coordination.
-
-- Classical MRS components provide structure, safety, and stability.
-
-- PPO excels as a local intelligence module when embedded within a principled control architecture.
-
-- The hybrid framework achieves robust, scalable, and interpretable swarm behavior.
-
----
-
-# Citation
-
-If you use or build upon this work / fork this work, please cite:
-
-> Ayushman Mishra, *PPO-Driven Swarm Control: A Hybrid Multi-Robot Framework Combining Consensus, Potential Fields, and CRN-Based Role Switching*, github.com/aymisxx/PPO-driven-Swarm-Control
-
-> Ayushman Mishra, *MicroUAV-2D: Lightweight 2D Down-Camera UAV Simulation Environment for Rapid Autonomy Prototyping*, github.com/aymisxx/MicroUAV-2D
-
----
+That is the actual heart of **PPO-Driven Swarm Control**.
