@@ -59,10 +59,10 @@ The notebook is designed for **user-driven experimentation**.
 
 1.  Run Section 0 → this creates:
 
-data/\
-results/\
-models/\
-logs/
+- data/
+- results/
+- models/
+- logs/
 
 2.  Place your own image inside as:
 
@@ -88,9 +88,8 @@ This project is not intended to be replayed as a fixed script.
 
 Instead:
 
-The notebook defines a system.\
-Users are expected to apply it to their own data and observe emergent
-behavior.
+The notebook defines a system.
+Users are expected to apply it to their own data and observe emergent behavior.
 
 ## Final Output
 
@@ -106,9 +105,9 @@ Running the full pipeline produces:
 
 ## Summary
 
--   PDF → explanation and results.\
--   Notebook → full implementation.\
--   Author folders → reference.\
+-   PDF → explanation and results.
+-   Notebook → full implementation.
+-   Author folders → reference.
 -   User folders → generated automatically.
 
 Use this as a framework, not just a result.
