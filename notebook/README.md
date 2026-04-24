@@ -39,7 +39,7 @@ To use:
 
 ### 3. `author_data/`
 
--   Contains the satellite image used by the author.
+-   Contains the ai-generated top-down satellite image used by the author.
 -   Serves as a **reference input**.
 
 ### 4. `author_results/`
@@ -49,7 +49,7 @@ To use:
     -   metrics.
     -   final GIF.
 
-These are **example outputs**, not fixed targets.
+These are **author's outputs**, not fixed targets.
 
 ## Running Your Own Experiment
 
