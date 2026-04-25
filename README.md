@@ -673,7 +673,9 @@ The artifact was built under strict constraints:
 
 That matters because many swarm visualizations look "better" only because they hide agents, blur trajectories, or rescale every frame. This work avoids that.
 
-![Hybrid Controller](notebook/author_results/gifs/final_hybrid_swarm.gif)
+![Hybrid Controller 1](notebook/author_results/gifs/final_hybrid_swarm_1.gif)
+
+![Hybrid Controller 2](notebook/author_results/gifs/final_hybrid_swarm_2.gif)
 
 ---
 
@@ -681,9 +683,7 @@ That matters because many swarm visualizations look "better" only because they h
 
 #### Preview Artifact
 
-![Final Hybrid Swarm Artifact It1](results/gifs/final_hybrid_swarm_1.gif)
-
-![Final Hybrid Swarm Artifact It2](results/gifs/final_hybrid_swarm_2.gif)
+![Final Hybrid Swarm Artifact It1](results/gifs/final_hybrid_swarm.gif)
 
 ### GIF frame layout
 
