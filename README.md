@@ -587,7 +587,7 @@ Purpose:
 
 ### Main comparative table
 
-![Section 11 final comparative metrics](notebook/author_results/section11_metrics.png)
+![Section 11 final comparative metrics](notebook/author_results/plots/section11_metrics.png)
 
 
 ## Sections 12–13: Role Definitions and the Case for Heterogeneity
@@ -645,7 +645,7 @@ Purpose:
 | Mean pairwise distance | 104.23 |
 | Close encounters | **0** |
 
-![Section 14 role-switch metrics](notebook/author_results/role_switch_graph.png)
+![Section 14 role-switch metrics](notebook/author_results/plots/role_switch_graph.png)
 
 Final role distribution (example run): Explorer 2, Surveyor 1, Defender 2, Idle 3.
 
