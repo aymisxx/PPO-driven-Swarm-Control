@@ -190,7 +190,7 @@ The authoritative cross-controller comparison comes from the Section 11 saved ta
 | PPO + Repulsion | 0.968633 | 0.936160 | 0.968632 | 0.0 | 1.00000 | 1.000000 | 0.0 | 0.0 |
 | PPO + Repulsion + Consensus | 1.000000 | 0.988643 | 1.000000 | 0.0 | 0.99550 | 0.883915 | 0.0 | 1.0 |
 
-### Lessons from the table (drawn from the PDF narrative)
+### Lessons from the table
 
 #### 1. Naive PPO is unsafe, not just imperfect
 
