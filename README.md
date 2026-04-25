@@ -847,42 +847,42 @@ Those libraries are foundational to this work, and this README explicitly acknow
 
 ## References
 
-##### [1] Proximal Policy Optimization
+#### [1] Proximal Policy Optimization
 
 John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov,  
 **"Proximal Policy Optimization Algorithms,"**  
 arXiv preprint arXiv:1707.06347, 2017.  
 Paper: https://arxiv.org/abs/1707.06347
 
-##### [2] Potential Field Methods and Their Limitations
+#### [2] Potential Field Methods and Their Limitations
 
 Y. Koren and J. Borenstein,  
 **"Potential Field Methods and Their Inherent Limitations for Mobile Robot Navigation,"**  
 Proceedings of the IEEE International Conference on Robotics and Automation (ICRA), 1991.  
 Paper: https://www.researchgate.net/publication/224749557_Potential_Field_Methods_and_Their_Inherent_Limitations_for_Mobile_Robot_Navigation
 
-##### [3] Potential Field-Based Coverage
+#### [3] Potential Field-Based Coverage
 
 A. Howard, M. J. Mataric, and G. S. Sukhatme,  
 **"Mobile Sensor Network Deployment Using Potential Fields: A Distributed, Scalable Solution to the Area Coverage Problem,"**  
 Distributed Autonomous Robotic Systems (DARS), 2002.  
 Paper: https://www.researchgate.net/publication/2562387_Mobile_Sensor_Network_Deployment_Using_Potential_Fields_A_Distributed_Scalable_Solution_to_the_Area_Coverage_Problem
 
-##### [4] Stochastic Task Allocation in Swarms
+#### [4] Stochastic Task Allocation in Swarms
 
 S. Berman, Á. M. Halász, M. A. Hsieh, and V. Kumar,  
 **"Optimized Stochastic Policies for Task Allocation in Swarms of Robots,"**  
 IEEE Transactions on Robotics, 2009.  
 Paper: https://www.researchgate.net/publication/32205868_Optimized_Stochastic_Policies_for_Task_Allocation_in_Swarms_of_Robots
 
-##### [5] Mean-Field Models in Swarm Robotics
+#### [5] Mean-Field Models in Swarm Robotics
 
 K. Elamvazhuthi and S. Berman,  
 **"Mean-Field Models in Swarm Robotics: A Survey,"**  
 Bioinspiration & Biomimetics, 2019.  
 Paper: https://www.researchgate.net/publication/333561725_Mean-Field_Models_in_Swarm_Robotics_A_Survey
 
-##### [6] Simulation Environment
+#### [6] Simulation Environment
 
 Ayushman Mishra,  
 **"MicroUAV-2D: A Lightweight Simulator for Vision-Based UAV Autonomy,"**  
