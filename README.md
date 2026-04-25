@@ -604,10 +604,10 @@ The role-switching layer assigns each agent one of four internal roles, and the 
 
 | Role | Color | Objective | Controller weighting |
 |---|---|---|---|
-| 🔵 **Explorer** | `tab:blue` | Frontier expansion: discover new regions and grow coverage outward. | Strong PPO drive, weaker consensus, moderate repulsion. |
-| 🟠 **Surveyor** | `tab:orange` | Coverage refinement: systematic local inspection, reduce redundancy. | Balanced PPO and potential-field, stronger revisit avoidance, moderate consensus. |
-| 🟢 **Defender** | `tab:green` | Safety enforcement: maintain spacing, prevent congestion. | Lower PPO drive, stronger repulsion, stronger stabilizing influence. |
-| 🔴 **Idle** | `tab:red` | Damping / congestion relief: reduce unnecessary motion, avoid over-synchronization. | Reduced motion probability, weak exploratory drift, lower control magnitude. |
+| 🔵 **Explorer** | `BLUE` | Frontier expansion: discover new regions and grow coverage outward. | Strong PPO drive, weaker consensus, moderate repulsion. |
+| 🟠 **Surveyor** | `ORANGE` | Coverage refinement: systematic local inspection, reduce redundancy. | Balanced PPO and potential-field, stronger revisit avoidance, moderate consensus. |
+| 🟢 **Defender** | `GREEN` | Safety enforcement: maintain spacing, prevent congestion. | Lower PPO drive, stronger repulsion, stronger stabilizing influence. |
+| 🔴 **Idle** | `RED` | Damping / congestion relief: reduce unnecessary motion, avoid over-synchronization. | Reduced motion probability, weak exploratory drift, lower control magnitude. |
 
 In the role-conditioned hybrid controller
 
