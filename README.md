@@ -645,9 +645,9 @@ Purpose:
 | Mean pairwise distance | 104.23 |
 | Close encounters | **0** |
 
-![Section 14 role-switch metrics](notebook/author_results/plots/role_switch_graph.png)
+#### **Final role distribution (example run):**
 
-Final role distribution (example run): Explorer 2, Surveyor 1, Defender 2, Idle 3.
+![Section 14 role-switch metrics](notebook/author_results/plots/role_switch_graph.png)
 
 ## Section 15: Final Swarm GIF Visualization
 
